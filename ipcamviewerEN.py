@@ -21,7 +21,7 @@ def main():
     window.geometry("400x200")
     
     addresstext = Tk.Label(text="Enter an RTSP link:" + "\n" + "(format: rtsp://username:password@IPaddress:port)")
-    addresstext.place(x=55, y=85)
+    addresstext.place(x=60, y=70)
     
     address = Tk.Entry(window, width=45)
     address.place(x=65, y=120)
