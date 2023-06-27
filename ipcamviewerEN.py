@@ -59,7 +59,7 @@ def main():
                 cv2.destroyAllWindows()
             except cv2.error: 
                 cv2.destroyAllWindows()
-                warn("Badly written address")
+                warn("Invalid address")
     
     start = Tk.Button(window, width=5, height=1, text="Stream", command=play)
     start.place(x=180, y=160)
