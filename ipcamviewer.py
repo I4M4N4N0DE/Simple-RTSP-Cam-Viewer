@@ -21,7 +21,7 @@ def main():
     okno.geometry("400x200")
     
     textadresa = Tk.Label(text="Zadej RTSP odkaz:" + "\n" + "(formát rtsp://uživatel:heslo@veřejnáIPadresa:port)")
-    textadresa.place(x=60, y=85)
+    textadresa.place(x=80, y=70)
     
     adresa = Tk.Entry(okno, width=45)
     adresa.place(x=65, y=120)
