@@ -1,2 +1,2 @@
 # Simple-RTSP-Cam-Viewer
-Required packages: Tkinter, keyboard.
+Required packages: Tkinter, keyboard, OpenCV.
