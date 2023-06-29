@@ -125,7 +125,8 @@ def main():
     
     def deleteall():
         addresslist.delete(0,4)
-            
+        os.remove(path + "/adresses.json")
+          
     choice = Tk.Button(window, width=6, height=1, text="Choose", command=enteraddress)
     choice.place(x=110, y=310)
     
