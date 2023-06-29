@@ -125,6 +125,7 @@ def main():
     
     def smazatvse():
         listadres.delete(0,4)
+        os.remove(cesta + "/adresy.json")
             
     vyber = Tk.Button(window, width=5, height=1, text="Zvolit", command=vlozitadresu)
     vyber.place(x=110, y=310)
