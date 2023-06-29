@@ -12,6 +12,8 @@ ipdata = {"adress1":"",
 
 path = os.path.dirname(os.path.abspath(__file__))
 
+bullet = "\u2022"
+
 def warn(content):
     achtung = Tk.Tk()
     achtung.geometry("300x150")
@@ -38,7 +40,7 @@ def main():
                            + "\n" + "or rtsp://IPadress:port)")
     addresstext.place(x=85, y=70)
     
-    address = Tk.Entry(window, width=45)
+    address = Tk.Entry(window, width=45, show=bullet)
     address.place(x=65, y=120)
     
     datatext = Tk.Label(text="Last used addresses:")
@@ -120,12 +122,18 @@ def main():
             os.remove(path + "/adresses.json")
         else:
             pass
-            
-    choice = Tk.Button(window, width=5, height=1, text="Choose", command=enteraddress)
-    choice.place(x=130, y=310)
     
-    delete = Tk.Button(window, width=5, height=1, text="Delete", command=deleteaddresses)
-    delete.place(x=220, y=310)
+    def deleteall():
+        addresslist.delete(0,4)
+            
+    choice = Tk.Button(window, width=6, height=1, text="Choose", command=enteraddress)
+    choice.place(x=110, y=310)
+    
+    delete = Tk.Button(window, width=6, height=1, text="Delete", command=deleteaddresses)
+    delete.place(x=165, y=310)
+    
+    alldelete = Tk.Button(window, width=10, height=1, text="Delete all", command=deleteall)
+    alldelete.place(x=220, y=310)
     window.mainloop()
 
 main()
