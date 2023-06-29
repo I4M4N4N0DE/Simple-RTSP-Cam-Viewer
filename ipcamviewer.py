@@ -12,6 +12,8 @@ ipdata = {"adresa1":"",
 
 cesta = os.path.dirname(os.path.abspath(__file__))
 
+koule = "\u2022"
+
 def warn(obsah):
     achtung = Tk.Tk()
     achtung.geometry("300x150")
@@ -38,7 +40,7 @@ def main():
                            + "\n" + "nebo rtsp://IPadresa:port)")
     addresstext.place(x=85, y=70)
     
-    address = Tk.Entry(window, width=45)
+    address = Tk.Entry(window, width=45, show=koule)
     address.place(x=65, y=120)
     
     datatext = Tk.Label(text="Poslední použité adresy:")
@@ -112,7 +114,7 @@ def main():
         zvoleno = listadres.get(listadres.curselection())
         address.insert(0, zvoleno)
     
-    def smazatadresy():
+    def smazatadresu():
         listadres.delete(listadres.curselection())
         
         if not listadres.get(0,4):
@@ -120,12 +122,18 @@ def main():
             os.remove(cesta + "/adresy.json")
         else:
             pass
+    
+    def smazatvse():
+        listadres.delete(0,4)
             
     vyber = Tk.Button(window, width=5, height=1, text="Zvolit", command=vlozitadresu)
-    vyber.place(x=130, y=310)
+    vyber.place(x=110, y=310)
     
-    smazani = Tk.Button(window, width=5, height=1, text="Smazat", command=smazatadresy)
-    smazani.place(x=220, y=310)
+    smazani = Tk.Button(window, width=6, height=1, text="Smazat", command=smazatadresu)
+    smazani.place(x=160, y=310)
+    
+    smazanivseho = Tk.Button(window, width=9, height=1, text="Smazat vše", command=smazatvse)
+    smazanivseho.place(x=215, y=310)
     window.mainloop()
 
 main()
