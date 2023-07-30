@@ -1,2 +1,2 @@
 # Simple-RTSP-Cam-Viewer
-Required packages: Tkinter, keyboard, OpenCV, JSON.
+Install dependencies by `pip install -r requirements.txt`
