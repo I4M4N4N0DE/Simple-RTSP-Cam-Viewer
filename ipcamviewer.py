@@ -1,140 +1,104 @@
-import tkinter as Tk
+import tkinter as tk
+from tkinter.messagebox import showerror
 import cv2
-import keyboard
 import os
 import json
 
-ipdata = {"adresa1":"",
-          "adresa2":"",
-          "adresa3":"",
-          "adresa4":"",
-          "adresa5":""}
+class App:
+    def __init__(self):
+        self.path = os.path.dirname(os.path.abspath(__file__))
+        self.json_name = "addresses.json"
+        try:
+            with open(self.json_name) as f:
+                self.addresses = json.load(f)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            open(self.json_name, "w").close()
+            self.addresses = []
 
-cesta = os.path.dirname(os.path.abspath(__file__))
-
-koule = "\u2022"
-
-def warn(obsah):
-    achtung = Tk.Tk()
-    achtung.geometry("300x150")
-    achtung.title("Chyba")
-    achtung.resizable(False, False)
-    
-    vnimanie = Tk.Label(achtung, text=obsah)
-    vnimanie.place(x=80, y=50)
-    achtung.mainloop()
-
-def main():
-    window = Tk.Tk()
-    window.title("RTSP Monitor")
-    window.resizable(False, False)
-    window.geometry("400x350")
-    
-    camname = Tk.Label(text="Pojmenuj kameru:")
-    camname.place(x=145, y=25)
-    
-    nameget = Tk.Entry(window, width=30)
-    nameget.place(x=105, y=50)
-    
-    addresstext = Tk.Label(text="Zadej RTSP odkaz:" + "\n" + "(formát rtsp://uživatel:heslo@IPadresa:port"
-                           + "\n" + "nebo rtsp://IPadresa:port)")
-    addresstext.place(x=85, y=70)
-    
-    address = Tk.Entry(window, width=45, show=koule)
-    address.place(x=65, y=120)
-    
-    datatext = Tk.Label(text="Poslední použité adresy:")
-    datatext.place(x=135, y=190)
-    
-    listadres = Tk.Listbox(window, width=45, height=5)
-    listadres.place(x=65, y=210)
-    
-    try:
-        with open(cesta + "/adresy.json", "r") as prectidaresy:
-            lastused = json.load(prectidaresy)
+        self.root = tk.Tk()
+        self.root.title("RTSP Monitor")
+        self.root.resizable(False, False)
+        self.root.geometry("400x350")
         
-        for adresa in lastused:
-            if adresa != "":
-                listadres.insert("end", lastused[adresa])
-            else:
+        tk.Label(text="Pojmenuj kameru:").place(x=145, y=25)
+        
+        self.name_entry = tk.Entry(self.root, width=30)
+        self.name_entry.place(x=105, y=50)
+        
+        tk.Label(text="Zadej RTSP odkaz:\n"
+                + "(formát rtsp://uživatel:heslo@IPadresa:port\n"
+                + "nebo rtsp://IPadresa:port)").place(x=85, y=70)
+        
+        self.address_entry = tk.Entry(self.root, width=45)
+        self.address_entry.place(x=65, y=120)
+        
+        tk.Label(text="Poslední použité adresy:").place(x=135, y=190)
+        
+        self.address_list = tk.Listbox(self.root, width=45, height=5)
+        self.address_list.place(x=65, y=210)
+        
+        for address in self.addresses:
+            self.address_list.insert("end", address)
+        if len(self.addresses):
+            self.address_entry.insert("end", self.addresses[-1])
+        
+        tk.Button(self.root, width=5, height=1, text="Spustit",
+                  command=self.play).place(x=180, y=150) 
+        tk.Button(self.root, width=5, height=1, text="Zvolit",
+                  command=self.insert_address).place(x=110, y=310)      
+        tk.Button(self.root, width=6, height=1, text="Smazat",
+                  command=self.delete_address).place(x=160, y=310)       
+        tk.Button(self.root, width=9, height=1, text="Smazat vše",
+                  command=self.delete_all).place(x=215, y=310)
+
+        self.root.mainloop()
+
+    def insert_address(self):
+        address = self.address_list.get(self.address_list.curselection())
+        self.address_entry.delete(0, "end")
+        self.address_entry.insert(0, self.address_list.get(address))
+
+    def delete_address(self):
+        self.address_list.delete(self.address_list.curselection())
+
+    def delete_all(self):
+        self.addresses = []
+        self.address_list.delete(0, "end")
+        with open(self.json_name, "w") as f:
+            json.dump(self.addresses, f)
+
+    def play(self):
+        address = self.address_entry.get()
+        name = self.name_entry.get()
+        
+        if address == "":
+            showerror("Chyba", "Chybí odkaz!")
+            return
+        elif name == "":
+            showerror("Chyba", "Chybí název kamery!")
+            return
+            
+        self.addresses.append(address)
+        self.address_list.insert("end", address)
+        
+        with open(self.json_name, "w") as f:
+            json.dump(self.addresses, f)
+            
+        cap = cv2.VideoCapture(address)
+        if not cap.isOpened():
+            showerror(message="Chybně zadaná nebo nefunkční adresa!")
+            return
+
+        winname = f"Monitoring kamery {name} - stiskni S pro ukonceni"
+        while True:
+            ret, frame = cap.read()
+            if not ret:
                 break
-    except FileNotFoundError:
-        pass
-    
-    def play():
-        ip = address.get()
-        name = nameget.get()
-        
-        if ip == "" and name != "":
-            warn("Odkaz chybí!")
-        elif ip != "" and name == "":
-            warn("Chybí název kamery!")
-        elif ip == "" and name == "":
-            warn("Nejsou zadány" + "\n" + "žádné údaje.")
-        else:
-            
-            try:
-                for kamera, adresa in ipdata.items():
-                    if adresa == "":
-                        ipdata[kamera] = ip
-                        break
-                    else:
-                        continue
-                
-                with open(cesta + "/adresy.json", "w") as ulozadresy:
-                    json.dump(ipdata, ulozadresy)
-                
-                for adresa in ipdata.values():
-                    if adresa != "":
-                        listadres.insert("end", adresa)
-                        break
-                    else:
-                        continue
-                    
-                video = cv2.VideoCapture(ip)
-            
-                winname = "Monitoring kamery " + name + " - stiskni S pro ukonceni"
-                while(keyboard.is_pressed("s") == False):
-                
-                    cv2.namedWindow(winname, cv2.WINDOW_NORMAL)
-                
-                    ret, frame = video.read()
-                    cv2.imshow(winname,frame)
-                    cv2.waitKey(1)
-                cv2.destroyAllWindows()
-            except cv2.error: 
-                cv2.destroyAllWindows()
-                warn("Chybně zadaná," + "\n" +
-                     "nebo nefunkční ip adresa")
-    
-    start = Tk.Button(window, width=5, height=1, text="Spustit", command=play)
-    start.place(x=180, y=150)
 
-    def vlozitadresu():
-        zvoleno = listadres.get(listadres.curselection())
-        address.insert(0, zvoleno)
-    
-    def smazatadresu():
-        listadres.delete(listadres.curselection())
-        
-        if not listadres.get(0,4):
-            listadres.delete(0,4)
-            os.remove(cesta + "/adresy.json")
-        else:
-            pass
-    
-    def smazatvse():
-        listadres.delete(0,4)
-        os.remove(cesta + "/adresy.json")
-            
-    vyber = Tk.Button(window, width=5, height=1, text="Zvolit", command=vlozitadresu)
-    vyber.place(x=110, y=310)
-    
-    smazani = Tk.Button(window, width=6, height=1, text="Smazat", command=smazatadresu)
-    smazani.place(x=160, y=310)
-    
-    smazanivseho = Tk.Button(window, width=9, height=1, text="Smazat vše", command=smazatvse)
-    smazanivseho.place(x=215, y=310)
-    window.mainloop()
+            cv2.imshow(winname, frame)
 
-main()
+            if cv2.waitKey(1) == ord("s"):
+                break
+        cv2.destroyAllWindows()
+
+App()
